@@ -22,7 +22,8 @@ mod erc20 {
             derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
         )]
         pub struct Maizo {
-            locates:Vec<Locate>
+            locates:Vec<Locate>,
+            locates:Mapping<AccountId,Locate>
         }
 
         #[ink(constructor)]
@@ -32,6 +33,10 @@ mod erc20 {
         #[ink(constructor)]
         pub fn default() -> Self {
             Self::new(Default::default())
+        }
+        #[ink(constructor)]
+        pub fn new_with_value(init_value: u32) -> Self {
+            Self::new(init_value)
         }
         #[ink(message)]
         pub fn post(&mut self,name:String,value:u32,image:String,lat:u32,lng:u32) {
@@ -63,7 +68,6 @@ mod erc20 {
         total_supply: Balance,
         balances: Mapping<AccountId, Balance>,
         allowances: Mapping<(AccountId, AccountId), Balance>,
-
         locates: Locates,
     }
 
