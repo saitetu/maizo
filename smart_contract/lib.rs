@@ -6,81 +6,67 @@ mod erc20 {
     use ink::prelude::string::String;
     use ink::prelude::vec::Vec;
 
-    // // 
+    impl Maizo {
+        pub struct Locate {
+            name: String,
+            value: u32,
+            image: String,
+            lat: u32,
+            lng: u32,
+        }
     
-    // pub struct Locate {
-    //     name: String,
-    //     value: u32,
-    //     image: String,
-    //     lat: u32,
-    //     lng: u32,
-    // }
+        #[ink(storage)]
+        #[derive(scale::Encode, scale::Decode)]
+        #[cfg_attr(
+            feature = "std",
+            derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
+        )]
+        pub struct Maizo {
+            locates:Vec<Locate>
+        }
 
-    // #[ink(storage)]
-    // #[derive(scale::Encode, scale::Decode)]
-    // #[cfg_attr(
-    //     feature = "std",
-    //     derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
-    // )]
-    // pub struct Maizo {
-    //     locates:Vec<Locate>
-    // }
+        #[ink(constructor)]
+        pub fn new() -> Self {
+            Self { locates: Vec::new() }
+        }
+        #[ink(constructor)]
+        pub fn default() -> Self {
+            Self::new(Default::default())
+        }
+        #[ink(message)]
+        pub fn post(&mut self,name:String,value:u32,image:String,lat:u32,lng:u32) {
+            let locate = Locate {
+                name: name,
+                value: value,
+                image: image,
+                lat: lat,
+                lng: lng,
+            };
+            self.locates.push(locate);
+        }
 
-    // impl Maizo {
-    //     /// Constructor that initializes the `bool` value to the given `init_value`.
-    //     #[ink(constructor)]
-    //     pub fn new() -> Self {
-    //         Self { locates: Vec::new() }
-    //     }
-
-    //     /// Constructor that initializes the `bool` value to `false`.
-    //     ///
-    //     /// Constructors can delegate to other constructors.
-    //     #[ink(constructor)]
-    //     pub fn default() -> Self {
-    //         Self::new(Default::default())
-    //     }
-    //     #[ink(message)]
-    //     pub fn post(&mut self,name:String,value:u32,image:String,lat:u32,lng:u32) {
-    //         let locate = Locate {
-    //             name: name,
-    //             value: value,
-    //             image: image,
-    //             lat: lat,
-    //             lng: lng,
-    //         };
-    //         self.locates.push(locate);
-    //     }
-
-    //     #[ink(message)]
-    //     pub fn get(&self) -> Vec<Locate> {
-    //         self.locates.clone()
-    //     }
+        #[ink(message)]
+        pub fn get(&self) -> Vec<Locate> {
+            self.locates.clone()
+        }
         
-    // }
-    // //
+    }
 
     #[derive(Default, scale::Encode, scale::Decode, Clone)]
     pub struct Locates {
         value: Vec<String>,
     }
 
-    /// A simple ERC-20 contract.
     #[ink(storage)]
     #[derive(Default)]
     pub struct Erc20 {
-        /// Total token supply.
         total_supply: Balance,
-        /// Mapping from owner to number of owned token.
         balances: Mapping<AccountId, Balance>,
-        /// Mapping of the token amount which an account is allowed to withdraw
-        /// from another account.
         allowances: Mapping<(AccountId, AccountId), Balance>,
 
         locates: Locates,
     }
 
-    /// Event emitted when a token transfer occurs.
     #[ink(event)]
     pub struct Transfer {
         #[ink(topic)]
@@ -90,8 +76,6 @@ mod erc20 {
         value: Balance,
     }
 
-    /// Event emitted when an approval occurs that `spender` is allowed to withdraw
-    /// up to the amount of `value` tokens from `owner`.
     #[ink(event)]
     pub struct Approval {
         #[ink(topic)]
@@ -101,21 +85,15 @@ mod erc20 {
         value: Balance,
     }
 
-    /// The ERC-20 error types.
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
-        /// Returned if not enough balance to fulfill a request is available.
         InsufficientBalance,
-        /// Returned if not enough allowance to fulfill a request is available.
         InsufficientAllowance,
     }
-
-    /// The ERC-20 result type.
     pub type Result<T> = core::result::Result<T, Error>;
 
     impl Erc20 {
-        /// Creates a new ERC-20 contract with the specified initial supply.
         #[ink(constructor)]
         pub fn new(total_supply: Balance) -> Self {
             let mut balances = Mapping::default();
@@ -134,7 +112,6 @@ mod erc20 {
             }
         }
 
-        /// Returns the total token supply.
         #[ink(message)]
         pub fn total_supply(&self) -> Balance {
             self.total_supply
@@ -144,10 +121,7 @@ mod erc20 {
         pub fn getLoactes(&mut self) -> Locates {
             self.locates.clone()
         }
-
-        /// Returns the account balance for the specified `owner`.
-        ///
-        /// Returns `0` if the account is non-existent.
+        
         #[ink(message)]
         pub fn balance_of(&self, owner: AccountId) -> Balance {
             self.balance_of_impl(&owner)
