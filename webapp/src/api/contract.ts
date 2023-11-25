@@ -148,3 +148,25 @@ export async function tokenChanges(value: number) {
   return output?.toHuman();
 }
 
+export async function getRandomlyToken(location: String) {
+  const provider = new WsProvider("wss://rpc.shibuya.astar.network");
+  const api = await ApiPromise.create({ provider });
+  const address = process.env.REACT_APP_ADDRESS as string;
+
+  const contract = new ContractPromise(
+    api,
+    metadata,
+    address
+  );
+
+  const { gasConsumed, result, output } = await contract.tx
+    .getRandomlyToken(ALICE, {
+      gasLimit: api?.registry.createType("WeightV2", {
+        refTime: MAX_CALL_WEIGHT,
+        proofSize: PROOFSIZE,
+      }) as WeightV2,
+      storageDepositLimit,
+    }, location)
+    .signAndSend(ALICE);
+  return output?.toHuman();
+}
