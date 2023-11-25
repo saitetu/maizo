@@ -6,14 +6,54 @@ mod erc20 {
     use ink::prelude::string::String;
     use ink::prelude::vec::Vec;
 
+    #[derive(Default, scale::Encode, scale::Decode, Clone)]
+    pub struct Locates {
+        value: Vec<String>,
+    }
+
+    #[ink(storage)]
+    #[derive(Default)]
+    pub struct Maizo {
+        total_supply: Balance,
+        balances: Mapping<AccountId, Balance>,
+        allowances: Mapping<(AccountId, AccountId), Balance>,
+        locates: Locates,
+    }
+
+    #[ink(event)]
+    pub struct Transfer {
+        #[ink(topic)]
+        from: Option<AccountId>,
+        #[ink(topic)]
+        to: Option<AccountId>,
+        value: Balance,
+    }
+
+    #[ink(event)]
+    pub struct Approval {
+        #[ink(topic)]
+        owner: AccountId,
+        #[ink(topic)]
+        spender: AccountId,
+        value: Balance,
+    }
+
+    #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
+    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+    pub enum Error {
+        InsufficientBalance,
+        InsufficientAllowance,
+    }
+    pub type Result<T> = core::result::Result<T, Error>;
+
+    pub struct Locate {
+        name: String,
+        value: u32,
+        image: String,
+        lat: u32,
+        lng: u32,
+    }
     impl Maizo {
-        pub struct Locate {
-            name: String,
-            value: u32,
-            image: String,
-            lat: u32,
-            lng: u32,
-        }
     
         #[ink(storage)]
         #[derive(scale::Encode, scale::Decode)]
@@ -54,50 +94,7 @@ mod erc20 {
         pub fn get(&self) -> Vec<Locate> {
             self.locates.clone()
         }
-        
-    }
 
-    #[derive(Default, scale::Encode, scale::Decode, Clone)]
-    pub struct Locates {
-        value: Vec<String>,
-    }
-
-    #[ink(storage)]
-    #[derive(Default)]
-    pub struct Erc20 {
-        total_supply: Balance,
-        balances: Mapping<AccountId, Balance>,
-        allowances: Mapping<(AccountId, AccountId), Balance>,
-        locates: Locates,
-    }
-
-    #[ink(event)]
-    pub struct Transfer {
-        #[ink(topic)]
-        from: Option<AccountId>,
-        #[ink(topic)]
-        to: Option<AccountId>,
-        value: Balance,
-    }
-
-    #[ink(event)]
-    pub struct Approval {
-        #[ink(topic)]
-        owner: AccountId,
-        #[ink(topic)]
-        spender: AccountId,
-        value: Balance,
-    }
-
-    #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
-    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
-    pub enum Error {
-        InsufficientBalance,
-        InsufficientAllowance,
-    }
-    pub type Result<T> = core::result::Result<T, Error>;
-
-    impl Erc20 {
         #[ink(constructor)]
         pub fn new(total_supply: Balance) -> Self {
             let mut balances = Mapping::default();
@@ -215,7 +212,7 @@ mod erc20 {
             Hash,
         };
 
-        type Event = <Erc20 as ::ink::reflect::ContractEventBase>::Type;
+        type Event = <Maizo as ::ink::reflect::ContractEventBase>::Type;
 
         fn assert_transfer_event(
             event: &ink::env::test::EmittedEvent,
@@ -234,19 +231,19 @@ mod erc20 {
             }
             let expected_topics = vec![
                 encoded_into_hash(&PrefixedValue {
-                    value: b"Erc20::Transfer",
+                    value: b"Maizo::Transfer",
                     prefix: b"",
                 }),
                 encoded_into_hash(&PrefixedValue {
-                    prefix: b"Erc20::Transfer::from",
+                    prefix: b"Maizo::Transfer::from",
                     value: &expected_from,
                 }),
                 encoded_into_hash(&PrefixedValue {
-                    prefix: b"Erc20::Transfer::to",
+                    prefix: b"Maizo::Transfer::to",
                     value: &expected_to,
                 }),
                 encoded_into_hash(&PrefixedValue {
-                    prefix: b"Erc20::Transfer::value",
+                    prefix: b"Maizo::Transfer::value",
                     value: &expected_value,
                 }),
             ];
@@ -270,7 +267,7 @@ mod erc20 {
         #[ink::test]
         fn new_works() {
             // Constructor works.
-            let _erc20 = Erc20::new(100);
+            let _erc20 = Maizo::new(100);
 
             // Transfer event triggered during initial construction.
             let emitted_events = ink::env::test::recorded_events().collect::<Vec<_>>();
@@ -288,7 +285,7 @@ mod erc20 {
         #[ink::test]
         fn total_supply_works() {
             // Constructor works.
-            let erc20 = Erc20::new(100);
+            let erc20 = Maizo::new(100);
             // Transfer event triggered during initial construction.
             let emitted_events = ink::env::test::recorded_events().collect::<Vec<_>>();
             assert_transfer_event(
@@ -305,7 +302,7 @@ mod erc20 {
         #[ink::test]
         fn balance_of_works() {
             // Constructor works
-            let erc20 = Erc20::new(100);
+            let erc20 = Maizo::new(100);
             // Transfer event triggered during initial construction
             let emitted_events = ink::env::test::recorded_events().collect::<Vec<_>>();
             assert_transfer_event(
@@ -325,7 +322,7 @@ mod erc20 {
         #[ink::test]
         fn transfer_works() {
             // Constructor works.
-            let mut erc20 = Erc20::new(100);
+            let mut erc20 = Maizo::new(100);
             // Transfer event triggered during initial construction.
             let accounts =
                 ink::env::test::default_accounts::<ink::env::DefaultEnvironment>();
@@ -357,7 +354,7 @@ mod erc20 {
         #[ink::test]
         fn invalid_transfer_should_fail() {
             // Constructor works.
-            let mut erc20 = Erc20::new(100);
+            let mut erc20 = Maizo::new(100);
             let accounts =
                 ink::env::test::default_accounts::<ink::env::DefaultEnvironment>();
 
@@ -392,7 +389,7 @@ mod erc20 {
         #[ink::test]
         fn transfer_from_works() {
             // Constructor works.
-            let mut erc20 = Erc20::new(100);
+            let mut erc20 = Maizo::new(100);
             // Transfer event triggered during initial construction.
             let accounts =
                 ink::env::test::default_accounts::<ink::env::DefaultEnvironment>();
@@ -442,7 +439,7 @@ mod erc20 {
 
         #[ink::test]
         fn allowance_must_not_change_on_failed_transfer() {
-            let mut erc20 = Erc20::new(100);
+            let mut erc20 = Maizo::new(100);
             let accounts =
                 ink::env::test::default_accounts::<ink::env::DefaultEnvironment>();
 
@@ -536,7 +533,7 @@ mod erc20 {
         async fn e2e_transfer(mut client: ink_e2e::Client<C, E>) -> E2EResult<()> {
             // given
             let total_supply = 1_000_000_000;
-            let constructor = Erc20Ref::new(total_supply);
+            let constructor = MaizoRef::new(total_supply);
             let contract_acc_id = client
                 .instantiate("erc20", &ink_e2e::alice(), constructor, 0, None)
                 .await
@@ -544,7 +541,7 @@ mod erc20 {
                 .account_id;
 
             // when
-            let total_supply_msg = build_message::<Erc20Ref>(contract_acc_id.clone())
+            let total_supply_msg = build_message::<MaizoRef>(contract_acc_id.clone())
                 .call(|erc20| erc20.total_supply());
             let total_supply_res = client
                 .call_dry_run(&ink_e2e::bob(), &total_supply_msg, 0, None)
@@ -552,14 +549,14 @@ mod erc20 {
 
             let bob_account = ink_e2e::account_id(ink_e2e::AccountKeyring::Bob);
             let transfer_to_bob = 500_000_000u128;
-            let transfer = build_message::<Erc20Ref>(contract_acc_id.clone())
+            let transfer = build_message::<MaizoRef>(contract_acc_id.clone())
                 .call(|erc20| erc20.transfer(bob_account.clone(), transfer_to_bob));
             let _transfer_res = client
                 .call(&ink_e2e::alice(), transfer, 0, None)
                 .await
                 .expect("transfer failed");
 
-            let balance_of = build_message::<Erc20Ref>(contract_acc_id.clone())
+            let balance_of = build_message::<MaizoRef>(contract_acc_id.clone())
                 .call(|erc20| erc20.balance_of(bob_account));
             let balance_of_res = client
                 .call_dry_run(&ink_e2e::alice(), &balance_of, 0, None)
@@ -580,7 +577,7 @@ mod erc20 {
         async fn e2e_allowances(mut client: ink_e2e::Client<C, E>) -> E2EResult<()> {
             // given
             let total_supply = 1_000_000_000;
-            let constructor = Erc20Ref::new(total_supply);
+            let constructor = MaizoRef::new(total_supply);
             let contract_acc_id = client
                 .instantiate("erc20", &ink_e2e::bob(), constructor, 0, None)
                 .await
@@ -594,7 +591,7 @@ mod erc20 {
 
             let amount = 500_000_000u128;
             let transfer_from =
-                build_message::<Erc20Ref>(contract_acc_id.clone()).call(|erc20| {
+                build_message::<MaizoRef>(contract_acc_id.clone()).call(|erc20| {
                     erc20.transfer_from(
                         bob_account.clone(),
                         charlie_account.clone(),
@@ -612,7 +609,7 @@ mod erc20 {
 
             // Bob approves Charlie to transfer up to amount on his behalf
             let approved_value = 1_000u128;
-            let approve_call = build_message::<Erc20Ref>(contract_acc_id.clone())
+            let approve_call = build_message::<MaizoRef>(contract_acc_id.clone())
                 .call(|erc20| erc20.approve(charlie_account.clone(), approved_value));
             client
                 .call(&ink_e2e::bob(), approve_call, 0, None)
@@ -621,7 +618,7 @@ mod erc20 {
 
             // `transfer_from` the approved amount
             let transfer_from =
-                build_message::<Erc20Ref>(contract_acc_id.clone()).call(|erc20| {
+                build_message::<MaizoRef>(contract_acc_id.clone()).call(|erc20| {
                     erc20.transfer_from(
                         bob_account.clone(),
                         charlie_account.clone(),
@@ -636,7 +633,7 @@ mod erc20 {
                 "approved transfer_from should succeed"
             );
 
-            let balance_of = build_message::<Erc20Ref>(contract_acc_id.clone())
+            let balance_of = build_message::<MaizoRef>(contract_acc_id.clone())
                 .call(|erc20| erc20.balance_of(bob_account));
             let balance_of_res = client
                 .call_dry_run(&ink_e2e::alice(), &balance_of, 0, None)
@@ -644,7 +641,7 @@ mod erc20 {
 
             // `transfer_from` again, this time exceeding the approved amount
             let transfer_from =
-                build_message::<Erc20Ref>(contract_acc_id.clone()).call(|erc20| {
+                build_message::<MaizoRef>(contract_acc_id.clone()).call(|erc20| {
                     erc20.transfer_from(bob_account.clone(), charlie_account.clone(), 1)
                 });
             let transfer_from_result = client
