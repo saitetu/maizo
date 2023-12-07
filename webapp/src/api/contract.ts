@@ -15,13 +15,9 @@ export async function getLoacationMaizo() {
   const api = await ApiPromise.create({ provider });
   const address = process.env.REACT_APP_ADDRESS as string;
 
-  const contract = new ContractPromise(
-    api,
-    metadata,
-    address
-  );
+  const contract = new ContractPromise(api, metadata, address);
 
-  const { gasRequired, result, output } = await contract.query.get(ALICE, {
+  const { output } = await contract.query.get(ALICE, {
     gasLimit: api?.registry.createType("WeightV2", {
       refTime: MAX_CALL_WEIGHT,
       proofSize: PROOFSIZE,
@@ -31,43 +27,43 @@ export async function getLoacationMaizo() {
   return output?.toHuman();
 }
 
-export async function transferFromMaizo(value: number, from: string, to: string) {
+export async function transferFromMaizo(
+  value: number,
+  from: string,
+  to: string
+) {
   const provider = new WsProvider("wss://rpc.shibuya.astar.network");
   const api = await ApiPromise.create({ provider });
   const address = process.env.REACT_APP_ADDRESS as string;
 
-  const contract = new ContractPromise(
-    api,
-    metadata,
-    address
-  );
+  const contract = new ContractPromise(api, metadata, address);
 
-  const { gasConsumed, result, output } = await contract.tx
-    .transferFrom(ALICE, {
-      gasLimit: api?.registry.createType("WeightV2", {
-        refTime: MAX_CALL_WEIGHT,
-        proofSize: PROOFSIZE,
-      }) as WeightV2,
-      storageDepositLimit,
-    }, value, from, to)
+  const { output } = await contract.tx
+    .transferFrom(
+      ALICE,
+      {
+        gasLimit: api?.registry.createType("WeightV2", {
+          refTime: MAX_CALL_WEIGHT,
+          proofSize: PROOFSIZE,
+        }) as WeightV2,
+        storageDepositLimit,
+      },
+      value,
+      from,
+      to
+    )
     .signAndSend(ALICE);
   return output?.toHuman();
 }
-
-
 
 export async function postLocation() {
   const provider = new WsProvider("wss://rpc.shibuya.astar.network");
   const api = await ApiPromise.create({ provider });
   const address = process.env.REACT_APP_ADDRESS as string;
 
-  const contract = new ContractPromise(
-    api,
-    metadata,
-    address
-  );
+  const contract = new ContractPromise(api, metadata, address);
 
-  const { gasConsumed, result, output } = await contract.tx
+  const { output } = await contract.tx
     .post(ALICE, {
       gasLimit: api?.registry.createType("WeightV2", {
         refTime: MAX_CALL_WEIGHT,
@@ -84,13 +80,9 @@ export async function exChangeToken() {
   const api = await ApiPromise.create({ provider });
   const address = process.env.REACT_APP_ADDRESS as string;
 
-  const contract = new ContractPromise(
-    api,
-    metadata,
-    address
-  );
+  const contract = new ContractPromise(api, metadata, address);
 
-  const { gasConsumed, result, output } = await contract.tx
+  const { output } = await contract.tx
     .post(ALICE, {
       gasLimit: api?.registry.createType("WeightV2", {
         refTime: MAX_CALL_WEIGHT,
@@ -107,13 +99,9 @@ export async function totalySupply() {
   const api = await ApiPromise.create({ provider });
   const address = process.env.REACT_APP_ADDRESS as string;
 
-  const contract = new ContractPromise(
-    api,
-    metadata,
-    address
-  );
+  const contract = new ContractPromise(api, metadata, address);
 
-  const { gasConsumed, result, output } = await contract.tx
+  const { output } = await contract.tx
     .total_supply(ALICE, {
       gasLimit: api?.registry.createType("WeightV2", {
         refTime: MAX_CALL_WEIGHT,
@@ -130,20 +118,20 @@ export async function tokenChanges(value: number) {
   const api = await ApiPromise.create({ provider });
   const address = process.env.REACT_APP_ADDRESS as string;
 
-  const contract = new ContractPromise(
-    api,
-    metadata,
-    address
-  );
+  const contract = new ContractPromise(api, metadata, address);
 
-  const { gasConsumed, result, output } = await contract.tx
-    .tokenChange(ALICE, {
-      gasLimit: api?.registry.createType("WeightV2", {
-        refTime: MAX_CALL_WEIGHT,
-        proofSize: PROOFSIZE,
-      }) as WeightV2,
-      storageDepositLimit,
-    }, value)
+  const { output } = await contract.tx
+    .tokenChange(
+      ALICE,
+      {
+        gasLimit: api?.registry.createType("WeightV2", {
+          refTime: MAX_CALL_WEIGHT,
+          proofSize: PROOFSIZE,
+        }) as WeightV2,
+        storageDepositLimit,
+      },
+      value
+    )
     .signAndSend(ALICE);
   return output?.toHuman();
 }
@@ -153,20 +141,20 @@ export async function getRandomlyToken(location: String) {
   const api = await ApiPromise.create({ provider });
   const address = process.env.REACT_APP_ADDRESS as string;
 
-  const contract = new ContractPromise(
-    api,
-    metadata,
-    address
-  );
+  const contract = new ContractPromise(api, metadata, address);
 
-  const { gasConsumed, result, output } = await contract.tx
-    .getRandomlyToken(ALICE, {
-      gasLimit: api?.registry.createType("WeightV2", {
-        refTime: MAX_CALL_WEIGHT,
-        proofSize: PROOFSIZE,
-      }) as WeightV2,
-      storageDepositLimit,
-    }, location)
+  const { output } = await contract.tx
+    .getRandomlyToken(
+      ALICE,
+      {
+        gasLimit: api?.registry.createType("WeightV2", {
+          refTime: MAX_CALL_WEIGHT,
+          proofSize: PROOFSIZE,
+        }) as WeightV2,
+        storageDepositLimit,
+      },
+      location
+    )
     .signAndSend(ALICE);
   return output?.toHuman();
 }
