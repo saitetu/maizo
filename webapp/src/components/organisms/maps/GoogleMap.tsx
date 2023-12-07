@@ -7,7 +7,6 @@ import {
 import React, { FC, useEffect, useRef, useState } from "react";
 import { useMap } from "../../../hooks/useMap";
 import { styleMap } from "../../../styles/GoogleMapStyls";
-import mapPin from "../../../config/mapPin.json";
 import {
   generateRandomNumberInRange,
   loadFromCache,
@@ -20,6 +19,13 @@ import { Fab } from "@mui/material";
 import { Gps } from "../../atoms/Icon";
 import CoinValueModal from "../modals/CoinValueModal";
 import { useCoinContext } from "../../../provider/CoinProvider";
+import { postTypes } from "../../../types";
+import {
+  getLoacationMaizo,
+  getRandomlyToken,
+  transferFromMaizo,
+} from "../../../api/contract";
+import { useAuthContext } from "../../../provider/AuthProvider";
 type Props = {
   defaultPosition: {
     lat: number;
@@ -34,8 +40,10 @@ const GoogleMap: FC<Props> = (props) => {
   const [zoom, setZoom] = useState<number>(12);
   const getModal = useModal();
   const coinModal = useModal();
+  const [mapPin, setMapPin] = useState<postTypes[]>([]);
   const [isMaizoIllust, setIsMaizoIllust] = useState<boolean>(false);
   const coinContext = useCoinContext();
+  const { authUser } = useAuthContext();
   const [chosenPin, setChosenPin] = useState({
     name: "",
     value: 0,
@@ -65,6 +73,9 @@ const GoogleMap: FC<Props> = (props) => {
     } else {
       noiseListRef.current = loadNoiseList;
     }
+    (async () => {
+      setMapPin((await getLoacationMaizo()) as unknown as postTypes[]);
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const { isLoaded, onLoad } = useMap({
@@ -80,10 +91,17 @@ const GoogleMap: FC<Props> = (props) => {
     disableDefaultUI: true,
   };
 
-  const getCoin = () => {
+  const getCoin = async (pin: postTypes) => {
     setIsMaizoIllust(true);
+    const coinValue = await transferFromMaizo(
+      await getRandomlyToken(pin),
+      pin.id,
+      authUser
+    );
+
     setTimeout(() => {
       coinModal.openModal();
+      coinContext.setCoin(coinContext.coin + coinValue);
     }, 2000);
   };
   return (
@@ -132,6 +150,7 @@ const GoogleMap: FC<Props> = (props) => {
                           value: pin.value,
                           image: pin.image,
                         });
+                        getCoin(pin);
                         getModal.openModal();
                       }}
                     >
@@ -227,7 +246,6 @@ const GoogleMap: FC<Props> = (props) => {
         image={chosenPin.image}
         onClick={() => {
           getModal.closeModal();
-          getCoin();
         }}
       />
       {isMaizoIllust && (
@@ -244,7 +262,6 @@ const GoogleMap: FC<Props> = (props) => {
         value={0}
         image={""}
         handleClose={() => {
-          coinContext.setCoin(coinContext.coin + 235);
           coinModal.closeModal();
           setIsMaizoIllust(false);
         }}

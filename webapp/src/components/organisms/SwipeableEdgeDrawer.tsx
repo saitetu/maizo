@@ -10,10 +10,12 @@ import { FabIcon } from "../molecules/FabIcon";
 import { useNavigate } from "react-router-dom";
 import { HistoryContent } from "../molecules/HisotoryContent";
 import { useCoinContext } from "../../provider/CoinProvider";
-import mapPin from "../../config/mapPin.json";
 import { useEffect, useState } from "react";
 import PremiumModal from "./modals/PremiumModal";
 import { useModal } from "../../hooks/useModal";
+import { postTypes } from "../../types";
+import { getLoacationMaizo, transferFromMaizo } from "../../api/contract";
+import { useAuthContext } from "../../provider/AuthProvider";
 
 const drawerBleeding = 56;
 
@@ -44,24 +46,29 @@ const Puller = styled(Box)(({ theme }) => ({
 }));
 
 export default function SwipeableEdgeDrawer(props: Props) {
+  const { authUser } = useAuthContext();
   const { window } = props;
   const navigate = useNavigate();
   const coinContext = useCoinContext();
   const premiumModal = useModal();
   const [primeDeadline, setPrimeDeadline] = useState<Date | null>(null);
+  const [mapPin, setMapPin] = useState<postTypes[]>([]);
 
   // This is used only for the example
   const container =
     window !== undefined ? () => window().document.body : undefined;
 
   useEffect(() => {
-    const now = new Date();
-    const deadline = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate() + 7
-    );
-    setPrimeDeadline(deadline);
+    (async () => {
+      const now = new Date();
+      const deadline = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 7
+      );
+      setPrimeDeadline(deadline);
+      setMapPin((await getLoacationMaizo()) as unknown as postTypes[]);
+    })();
   }, []);
 
   return (
@@ -177,8 +184,7 @@ export default function SwipeableEdgeDrawer(props: Props) {
                     coinContext.isPrime ? "primeVipIcon" : "noPrimeVipIcon"
                   }
                 >
-                  <div className="flex items-center gap-3 absolute top-1/2 left-4 transform -translate-y-1/2"
-                  >
+                  <div className="flex items-center gap-3 absolute top-1/2 left-4 transform -translate-y-1/2">
                     <FabIcon name={"Vip"} size={"39"} />
                     <div>
                       {coinContext.isPrime
@@ -201,6 +207,7 @@ export default function SwipeableEdgeDrawer(props: Props) {
                   value={e.value}
                   onClick={() => {
                     coinContext.setSelectPos({
+                      id: e.id,
                       name: e.name,
                       value: e.value,
                       image: e.image,
@@ -217,12 +224,17 @@ export default function SwipeableEdgeDrawer(props: Props) {
         <PremiumModal
           open={premiumModal.isOpen}
           handleClose={premiumModal.closeModal}
-          onClick={() => {
+          onClick={async () => {
             if (coinContext.coin < 700) {
               alert("コインが足りません");
               return;
             }
-            coinContext.setCoin(coinContext.coin - 700);
+            const newCoinValue = await transferFromMaizo(
+              700,
+              "premium",
+              authUser
+            );
+            coinContext.setCoin(newCoinValue);
             coinContext.setIsPrime(true);
             premiumModal.closeModal();
           }}

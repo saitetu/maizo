@@ -19,6 +19,7 @@ const CoinContext = createContext<CoinProps>({
   isPrime: false,
   mode: "app",
   selectPos: {
+    id: "",
     lat: 0,
     lng: 0,
     image: "",

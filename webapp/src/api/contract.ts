@@ -4,6 +4,7 @@ import { BN, BN_ONE } from "@polkadot/util";
 import type { WeightV2 } from "@polkadot/types/interfaces";
 import "@polkadot/api-augment";
 import metadata from "../config/metadata.json";
+import { postTypes } from "../types";
 
 const ALICE = process.env.REACT_APP_ALICE as string;
 const MAX_CALL_WEIGHT = new BN(5_000_000_000_000).isub(BN_ONE);
@@ -56,7 +57,7 @@ export async function transferFromMaizo(
   return output?.toHuman();
 }
 
-export async function postLocation() {
+export async function postLocation(location: postTypes) {
   const provider = new WsProvider("wss://rpc.shibuya.astar.network");
   const api = await ApiPromise.create({ provider });
   const address = process.env.REACT_APP_ADDRESS as string;
@@ -70,6 +71,7 @@ export async function postLocation() {
         proofSize: PROOFSIZE,
       }) as WeightV2,
       storageDepositLimit,
+      location,
     })
     .signAndSend(ALICE);
   return output?.toHuman();
@@ -136,7 +138,7 @@ export async function tokenChanges(value: number) {
   return output?.toHuman();
 }
 
-export async function getRandomlyToken(location: String) {
+export async function getRandomlyToken(location: postTypes) {
   const provider = new WsProvider("wss://rpc.shibuya.astar.network");
   const api = await ApiPromise.create({ provider });
   const address = process.env.REACT_APP_ADDRESS as string;

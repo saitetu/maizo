@@ -6,6 +6,7 @@ export interface MarkerTypes {
 }
 
 export interface registerModalTypes {
+  id: string;
   name: string;
   image: string;
   value: number;
@@ -15,4 +16,4 @@ export interface postTypes extends registerModalTypes {
   lng: number;
 }
 
-export type ModeTypes = "app" | "register" | "history" ;
+export type ModeTypes = "app" | "register" | "history";

@@ -7,6 +7,7 @@ import React, { FC, useEffect, useRef, useState } from "react";
 import { useMap } from "../../../hooks/useMap";
 import { registerMap } from "../../../styles/GoogleMapStyls";
 import {
+  RandomID,
   generateRandomNumberInRange,
   loadFromCache,
   saveToCache,
@@ -17,6 +18,7 @@ import { MarkerTypes, postTypes } from "../../../types";
 import RegisterModal from "../modals/RegisterModal";
 import { useModal } from "../../../hooks/useModal";
 import { useCoinContext } from "../../../provider/CoinProvider";
+import { postLocation } from "../../../api/contract";
 // import { useNavigate } from "react-router-dom";
 type Props = {
   defaultPosition: {
@@ -158,12 +160,15 @@ const RegisterMap: FC<Props> = (props) => {
           <Fab
             className="fixed bottom-[140px] right-5 w-[65px] h-[65px] bg-black bg-opacity-50"
             onClick={() => {
-              moveToNewLocation(props.defaultPosition.lat,props.defaultPosition.lng);
+              moveToNewLocation(
+                props.defaultPosition.lat,
+                props.defaultPosition.lng
+              );
               setZoom(17);
               setIsDrag(false);
             }}
           >
-            <Gps fill={isDrag?"#fff":"#6BA6FF"} size="32" />
+            <Gps fill={isDrag ? "#fff" : "#6BA6FF"} size="32" />
           </Fab>
         </GoogleMapComponent>
       ) : (
@@ -182,12 +187,14 @@ const RegisterMap: FC<Props> = (props) => {
             return;
           }
           const postData: postTypes = {
+            id: RandomID(),
             name: e.name,
             value: e.value,
             image: e.image,
             lat: marker.position.lat,
             lng: marker.position.lng,
           };
+          postLocation(postData);
           console.log(postData);
           registerModal.closeModal();
           setCoin(coin - e.value);
