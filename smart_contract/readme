@@ -1,4 +1,0 @@
-ビルド方法
-```
-cargo +nightly contract build
-```
