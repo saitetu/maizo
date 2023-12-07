@@ -69,6 +69,8 @@ mod Maizo {
         pub lng: u32,
     }
 
+    
+
     impl Maizo {
         #[ink(constructor)]
         pub fn new(total_supply: Balance) -> Self {
@@ -119,6 +121,14 @@ mod Maizo {
                 value,
             });
             Ok(())
+        }
+
+        #[ink(message)]
+        pub fn get_randam(&mut self, value: Balance) -> u64 {
+            let random_seed = env::block_number() as u64;
+            let random_number = random_seed % value;
+
+            random_number
         }
 
         #[ink(message)]
