@@ -1,16 +1,45 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, createContext, useContext } from "react";
 import { Web3Auth } from "@web3auth/web3auth";
 import { SafeEventEmitterProvider } from "@web3auth/base";
-import RPC from "./evm";
+import RPC from "../components/organisms/evm";
 
 const clientId = process.env.REACT_APP_CLIENTID as string;
 
-function Auth() {
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
+
+interface AuthContextProps {
+  authUser: string;
+  isLogin: boolean;
+  setAuthUser: React.Dispatch<React.SetStateAction<string>>;
+  setIsLogin: React.Dispatch<React.SetStateAction<boolean>>;
+}
+const AuthContext = createContext<AuthContextProps>({
+  authUser: "",
+  isLogin: false,
+  setAuthUser: () => {},
+  setIsLogin: () => {},
+});
+
+export const useAuthContext = () => {
+  return useContext(AuthContext);
+};
+
+function AuthProvider(props: AuthProviderProps) {
   const [web3auth, setWeb3auth] = useState<Web3Auth | null>(null);
   const [provider, setProvider] = useState<SafeEventEmitterProvider | null>(
     null
   );
+  const [authUser, setAuthUser] = useState<string>("");
+  const [isLogin, setIsLogin] = useState<boolean>(false);
 
+  const value: AuthContextProps = {
+    authUser,
+    isLogin,
+    setAuthUser,
+    setIsLogin,
+  };
   useEffect(() => {
     const init = async () => {
       try {
@@ -149,27 +178,11 @@ function Auth() {
   );
 
   return (
-    <div className="container">
-      <h1 className="title">
-        <a target="_blank" href="http://web3auth.io/" rel="noreferrer">
-          Web3Auth
-        </a>
-        & ReactJS Example
-      </h1>
-
+    <AuthContext.Provider value={value}>
       <div className="grid">{provider ? loggedInView : unloggedInView}</div>
-
-      <footer className="footer">
-        <a
-          href="https://github.com/Web3Auth/Web3Auth/tree/master/examples/react-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Source code
-        </a>
-      </footer>
-    </div>
+      {props.children}
+    </AuthContext.Provider>
   );
 }
 
-export default Auth;
+export default AuthProvider;

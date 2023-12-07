@@ -20,15 +20,19 @@ export default function CoinValueModal(props: Props) {
         PaperProps={{
           style: {
             borderRadius: "99999px",
-            background:"rgba(0, 0, 0, 0.55)",
+            background: "rgba(0, 0, 0, 0.55)",
             height: "337px",
             width: "337px",
           },
         }}
         onClick={props.handleClose}
       >
-     <div className="text-[117px] absolute top-[20%] left-1/2 -translate-x-1/2 gradationColor font-bold">235</div>
-     <div className="text-[52px] absolute bottom-[15%] left-1/2 -translate-x-1/2 text-white font-bold">GET!!</div>
+        <div className="text-[117px] absolute top-[20%] left-1/2 -translate-x-1/2 gradationColor font-bold">
+          {props.value}
+        </div>
+        <div className="text-[52px] absolute bottom-[15%] left-1/2 -translate-x-1/2 text-white font-bold">
+          GET!!
+        </div>
       </Dialog>
     </div>
   );

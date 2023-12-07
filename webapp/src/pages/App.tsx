@@ -3,6 +3,7 @@ import GoogleMap from "../components/organisms/maps/GoogleMap";
 import useGeolocation from "../hooks/useGeolocation";
 import useContinuousGPS from "../hooks/useContinuousGPS";
 import { useCoinContext } from "../provider/CoinProvider";
+import AuthProvider from "../provider/AuthProvider";
 function App() {
   const locate = useGeolocation();
   const gpsData = useContinuousGPS();
@@ -12,7 +13,7 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <div>
+    <AuthProvider>
       {locate.coordinates && (
         <GoogleMap
           defaultPosition={{
@@ -21,7 +22,7 @@ function App() {
           }}
         />
       )}
-    </div>
+    </AuthProvider>
   );
 }
 

@@ -111,7 +111,7 @@ const HistoryMap: FC<Props> = (props) => {
                       .split(/\s+/)
                       .map((word, index, array) => (
                         <div className="text-center" key={index}>
-                            {word}
+                          {word}
                         </div>
                       ))}
                   </div>
@@ -148,17 +148,6 @@ const HistoryMap: FC<Props> = (props) => {
           width={337}
         />
       )}
-      <CoinValueModal
-        open={coinModal.isOpen}
-        name={""}
-        value={0}
-        image={""}
-        handleClose={() => {
-          coinContext.setCoin(coinContext.coin + 235);
-          coinModal.closeModal();
-          setIsMaizoIllust(false);
-        }}
-      />
     </>
   );
 };

@@ -9,17 +9,19 @@ import { useModal } from "../hooks/useModal";
 import { MenuIcon, PrevIcon } from "../assets";
 import { useCoinContext } from "../provider/CoinProvider";
 import { useEffect } from "react";
-import { Contract } from "../api/contract";
+// import { getLoacationMaizo } from "../api/contract";
 import { MaizoStatus } from "../components/molecules/MaizoStatus";
+import { totalySupply } from "../api/contract";
 
 export const Router = () => {
   const menuModal = useModal();
   const { coin, isFetch, setCoin, setIsFetch, mode, setMode } =
     useCoinContext();
   useEffect(() => {
-    Contract().then(() => console.log("contract"));
-    setCoin(2000);
-    setIsFetch(true);
+    (async () => {
+      setCoin(await totalySupply());
+      setIsFetch(true);
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
